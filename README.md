@@ -15,13 +15,19 @@ Assumes the container's default user is `root` (true for image-only devcontainer
 default, fork this and change the `target` paths in `devcontainer-feature.json` to match that user's
 home directory.
 
-### Publish (run locally — needs Docker, not available in a plain shell)
+### Publishing
 
-```bash
-gh auth refresh -h github.com -s write:packages
-echo "$(gh auth token)" | docker login ghcr.io -u pfeerick --password-stdin
-npx -y @devcontainers/cli features publish ./src -r ghcr.io -n pfeerick/devcontainer-features
-```
+Handled automatically by [`.github/workflows/publish.yml`](.github/workflows/publish.yml) on every
+push to `master` that touches `src/**`, using the official
+[`devcontainers/action`](https://github.com/devcontainers/action). It authenticates to GHCR with the
+workflow's own `GITHUB_TOKEN` — no local Docker, no personal access token needed. To ship a new
+version, bump `version` in `devcontainer-feature.json` and push; the action only publishes versions
+that don't already exist as a tag.
+
+**One-time step after the first successful run:** features publish to GHCR as a **private** package by
+default. Go to the package's settings on GitHub (`pfeerick` → Packages → `devcontainer-features/personal-mounts`
+→ Package settings) and change visibility to Public — otherwise any devcontainer pulling it via
+`dev.containers.defaultFeatures` will hit a registry auth wall, which defeats the point.
 
 This publishes `ghcr.io/pfeerick/devcontainer-features/personal-mounts:1`.
 
