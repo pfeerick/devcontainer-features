@@ -1,0 +1,46 @@
+# devcontainer-features
+
+Personal [Dev Container Features](https://containers.dev/implementors/features/), applied globally via
+VS Code's `dev.containers.defaultFeatures` user setting rather than being added to any individual
+project's `devcontainer.json`.
+
+## personal-mounts
+
+Bind-mounts the host's `~/.config/gh` and `~/.claude` into the container so `gh` auth and Claude Code
+config/memory persist across container rebuilds/resets — no secrets stored in git, no per-project
+`devcontainer.json` edits, no re-login after every rebuild.
+
+Assumes the container's default user is `root` (true for image-only devcontainer configs with no
+`remoteUser` set, e.g. `ghcr.io/edgetx/edgetx-dev`). If a project's image runs as a non-root user by
+default, fork this and change the `target` paths in `devcontainer-feature.json` to match that user's
+home directory.
+
+### Publish (run locally — needs Docker, not available in a plain shell)
+
+```bash
+gh auth refresh -h github.com -s write:packages
+echo "$(gh auth token)" | docker login ghcr.io -u pfeerick --password-stdin
+npx -y @devcontainers/cli features publish ./src -r ghcr.io -n pfeerick/devcontainer-features
+```
+
+This publishes `ghcr.io/pfeerick/devcontainer-features/personal-mounts:1`.
+
+### Use it (VS Code user settings.json, not project-level)
+
+```json
+"dev.containers.defaultFeatures": {
+  "ghcr.io/pfeerick/devcontainer-features/personal-mounts:1": {}
+}
+```
+
+### One-time local safety net
+
+Using default features can cause VS Code to write a `devcontainer-lock.json` into whatever project
+you open, recording the resolved feature version. Keep that out of every project's git status without
+touching any project's own `.gitignore`:
+
+```bash
+mkdir -p ~/.config/git
+echo 'devcontainer-lock.json' >> ~/.config/git/ignore
+git config --global core.excludesFile ~/.config/git/ignore
+```
