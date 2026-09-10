@@ -15,6 +15,15 @@ Assumes the container's default user is `root` (true for image-only devcontainer
 default, fork this and change the `target` paths in `devcontainer-feature.json` to match that user's
 home directory.
 
+Works on macOS, Linux, and Windows. The mount `source` resolves the host home directory as
+`${localEnv:HOME}${localEnv:USERPROFILE}` — the [documented cross-platform
+idiom](https://containers.dev/implementors/json_reference/#variables-in-devcontainerjson): macOS/Linux
+set `HOME` and leave `USERPROFILE` unset, Windows sets `USERPROFILE` and (usually) leaves `HOME` unset,
+so concatenating them picks up whichever one exists. **Known caveat:** if you launch VS Code from Git
+Bash on Windows, Git Bash sets `HOME` itself while Windows still has `USERPROFILE` set too, so both
+resolve and get concatenated into one broken path — launch VS Code normally (Start Menu/Explorer,
+`code .` from cmd/PowerShell) instead.
+
 ### Publishing
 
 Handled automatically by [`.github/workflows/publish.yml`](.github/workflows/publish.yml) on every

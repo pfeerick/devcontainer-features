@@ -1,16 +1,16 @@
 {
   "id": "personal-mounts",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "name": "Personal auth/config mounts",
   "description": "Bind-mounts the host's ~/.config/gh and ~/.claude into the container so gh and Claude Code auth/config persist across container rebuilds, with an ownership fix applied on every start.",
   "mounts": [
     {
-      "source": "${localEnv:HOME}/.config/gh",
+      "source": "${localEnv:HOME}${localEnv:USERPROFILE}/.config/gh",
       "target": "/root/.config/gh",
       "type": "bind"
     },
     {
-      "source": "${localEnv:HOME}/.claude",
+      "source": "${localEnv:HOME}${localEnv:USERPROFILE}/.claude",
       "target": "/root/.claude",
       "type": "bind"
     }
