@@ -24,6 +24,21 @@ Bash on Windows, Git Bash sets `HOME` itself while Windows still has `USERPROFIL
 resolve and get concatenated into one broken path — launch VS Code normally (Start Menu/Explorer,
 `code .` from cmd/PowerShell) instead.
 
+The feature also sets `CLAUDE_CONFIG_DIR=/root/.claude`, so Claude Code keeps its `.claude.json` (login
+state, per-project settings, user-scoped MCP servers) inside the mounted directory too. Without it,
+Claude Code reads `~/.claude.json` from the container's home, which is lost on every rebuild. The host's
+own `~/.claude.json` is untouched, so host and container keep separate copies.
+
+**Things the host and container share or don't:**
+
+- `settings.json`, `CLAUDE.md`, skills, agents, commands and plugins are shared. Hooks, `statusLine`
+  commands and `env` entries must work on both the host OS and Linux.
+- Sessions and memory are keyed by the project's path, so the same repo checked out on the host and
+  mounted in the container (e.g. `/workspaces/<repo>`) gets separate histories.
+- On macOS, `gh` stores its token in the Keychain by default, so the host's `hosts.yml` may have no token
+  the container can use. Run `gh auth login` once inside the container; the token it writes to the
+  shared `hosts.yml` then persists across rebuilds.
+
 ### Publishing
 
 Handled automatically by [`.github/workflows/publish.yml`](.github/workflows/publish.yml) on every
