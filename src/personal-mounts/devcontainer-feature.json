@@ -1,6 +1,6 @@
 {
   "id": "personal-mounts",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "name": "Personal auth/config mounts",
   "description": "Bind-mounts the host's ~/.config/gh and ~/.claude into the container so gh and Claude Code auth/config persist across container rebuilds, with an ownership fix applied on every start.",
   "mounts": [
@@ -15,5 +15,8 @@
       "type": "bind"
     }
   ],
+  "containerEnv": {
+    "CLAUDE_CONFIG_DIR": "/root/.claude"
+  },
   "postStartCommand": "/usr/local/share/personal-mounts/fix-ownership.sh"
 }
